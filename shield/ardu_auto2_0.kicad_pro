@@ -344,10 +344,7 @@
   },
   "libraries": {
     "pinned_footprint_libs": [],
-    "pinned_symbol_libs": [
-      "ardu_auto2_0-rescue",
-      "pwr_mgr"
-    ]
+    "pinned_symbol_libs": []
   },
   "meta": {
     "filename": "ardu_auto2_0.kicad_pro",
