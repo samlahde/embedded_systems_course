@@ -62,7 +62,10 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+uint8_t SPIRead(uint8_t address);
+void SPIWrite(uint8_t address, uint8_t data);
+void gyroInit(void);
+char* btmsg(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -78,6 +81,12 @@ void Error_Handler(void);
 #define IR5_GPIO_Port GPIOC
 #define IR4_Pin GPIO_PIN_3
 #define IR4_GPIO_Port GPIOC
+#define SCK_Pin GPIO_PIN_5
+#define SCK_GPIO_Port GPIOA
+#define SDO_Pin GPIO_PIN_6
+#define SDO_GPIO_Port GPIOA
+#define SDA_Pin GPIO_PIN_7
+#define SDA_GPIO_Port GPIOA
 #define H_ENA_Pin GPIO_PIN_12
 #define H_ENA_GPIO_Port GPIOF
 #define H_ENB_Pin GPIO_PIN_13
