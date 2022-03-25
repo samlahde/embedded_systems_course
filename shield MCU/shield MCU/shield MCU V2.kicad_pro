@@ -33,9 +33,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.762,
-          "height": 1.524,
-          "width": 1.524
+          "drill": 1.0,
+          "height": 1.5,
+          "width": 1.5
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -403,7 +403,7 @@
     "last_paths": {
       "gencad": "",
       "idf": "",
-      "netlist": "shield MCU.net",
+      "netlist": "shield MCU V2.net",
       "specctra_dsn": "",
       "step": "",
       "vrml": ""
