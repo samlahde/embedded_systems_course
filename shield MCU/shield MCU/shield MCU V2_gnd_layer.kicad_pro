@@ -33,7 +33,7 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 1.0,
+          "drill": 0.8,
           "height": 1.5,
           "width": 1.5
         },
@@ -346,7 +346,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "shield MCU V2.kicad_pro",
+    "filename": "shield MCU V2_gnd_layer.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -403,7 +403,7 @@
     "last_paths": {
       "gencad": "",
       "idf": "",
-      "netlist": "shield MCU V2.net",
+      "netlist": "shield MCU V2_gnd_layer.net",
       "specctra_dsn": "",
       "step": "",
       "vrml": ""
