@@ -1362,7 +1362,7 @@
   (symbol (lib_id "ardu_auto2_0-rescue:CONN_01X03-Arduino_shield-rescue") (at 308.61 146.05 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 230567c0-7caf-4639-bb34-b5eb4d53ac4c)
-    (property "Reference" "J3" (id 0) (at 308.61 140.97 0))
+    (property "Reference" "J2" (id 0) (at 308.61 140.97 0))
     (property "Value" "IR_sensor" (id 1) (at 311.15 146.05 90))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (id 2) (at 308.61 146.05 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -1560,7 +1560,7 @@
   (symbol (lib_id "ardu_auto2_0-rescue:CONN_01X03-Arduino_shield-rescue") (at 62.23 163.83 180) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 7fda894a-de6b-4380-8e0a-e719ef440511)
-    (property "Reference" "J2" (id 0) (at 62.23 168.91 0))
+    (property "Reference" "J3" (id 0) (at 62.23 168.91 0))
     (property "Value" "IR_sensor" (id 1) (at 59.69 163.83 90))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (id 2) (at 62.23 163.83 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -1576,7 +1576,7 @@
   (symbol (lib_id "ardu_auto2_0-rescue:CONN_01X03-Arduino_shield-rescue") (at 62.23 147.32 180) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 96eb817a-341f-49a7-912e-92df87d08c00)
-    (property "Reference" "J1" (id 0) (at 62.23 152.4 0))
+    (property "Reference" "J4" (id 0) (at 62.23 152.4 0))
     (property "Value" "IR_sensor" (id 1) (at 59.69 147.32 90))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (id 2) (at 62.23 147.32 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -1698,7 +1698,7 @@
   (symbol (lib_id "ardu_auto2_0-rescue:CONN_01X03-Arduino_shield-rescue") (at 308.61 157.48 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid cafb3204-9631-4c62-99c6-5dc6baad06e2)
-    (property "Reference" "J4" (id 0) (at 308.61 152.4 0))
+    (property "Reference" "J1" (id 0) (at 308.61 152.4 0))
     (property "Value" "IR_sensor" (id 1) (at 311.15 157.48 90))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (id 2) (at 308.61 157.48 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -1816,16 +1816,16 @@
     (path "/722b73b8-5397-45d3-9e89-0aa2de9d9408"
       (reference "H1") (unit 1) (value "Half-bridge") (footprint "Omat:L298HN")
     )
-    (path "/96eb817a-341f-49a7-912e-92df87d08c00"
+    (path "/cafb3204-9631-4c62-99c6-5dc6baad06e2"
       (reference "J1") (unit 1) (value "IR_sensor") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
     )
-    (path "/7fda894a-de6b-4380-8e0a-e719ef440511"
+    (path "/230567c0-7caf-4639-bb34-b5eb4d53ac4c"
       (reference "J2") (unit 1) (value "IR_sensor") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
     )
-    (path "/230567c0-7caf-4639-bb34-b5eb4d53ac4c"
+    (path "/7fda894a-de6b-4380-8e0a-e719ef440511"
       (reference "J3") (unit 1) (value "IR_sensor") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
     )
-    (path "/cafb3204-9631-4c62-99c6-5dc6baad06e2"
+    (path "/96eb817a-341f-49a7-912e-92df87d08c00"
       (reference "J4") (unit 1) (value "IR_sensor") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
     )
     (path "/eaae5cf5-e92a-47bb-9080-0f9bee3909ea"
