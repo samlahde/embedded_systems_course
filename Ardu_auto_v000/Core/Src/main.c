@@ -173,7 +173,7 @@ int main(void)
 	   * they just push left value until another command is received
 	   * */
 	  bt_msg = btmsg();
-	  printf("%s", bt_msg);
+	  printf("%s\r\n", bt_msg);
 
 	  /*GY-50
 	   * HAL SPI 1 Bus
@@ -543,7 +543,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void SPIWrite(uint8_t address, uint8_t data)
 {
-  address |= 0x7F;
+  address &= 0x7F;
   //SPI TX on
   HAL_GPIO_WritePin(GPIOF, SPI_CS_Pin, GPIO_PIN_RESET);
   //SPI address transmit
@@ -579,18 +579,19 @@ L3G4200D_output Get_gyro_values()
 	y_h = SPIRead(L3G4200D_REG_OUT_Y_H);
 	z_l = SPIRead(L3G4200D_REG_OUT_Z_L);
 	z_h = SPIRead(L3G4200D_REG_OUT_Z_H);
-	gyro_data.x = (x_l &0xFF << 8) | (x_h & 0xFF);
-	gyro_data.y = (y_l &0xFF << 8) | (y_h & 0xFF);
-	gyro_data.z = (z_l &0xFF << 8) | (z_h & 0xFF);
+	gyro_data.x = (x_l & 0xFF) | ((x_h & 0xFF) << 8);
+	gyro_data.y = (y_l & 0xFF) | ((y_h & 0xFF) << 8);
+	gyro_data.z = (z_l & 0xFF) | ((z_h & 0xFF) << 8);
 	return gyro_data;
-
 }
 
 void gyroInit()
 {
-	uint8_t scale;
-  // Enable x, y, z and turn off power down:
-  SPIWrite(L3G4200D_REG_CTRL_REG1, 0xf);
+  uint8_t scale, status;
+  status = SPIRead(L3G4200D_REG_WHO_AM_I);
+  printf("%d\r\n", status);
+  // Enable x, y, z and turn off power down mode:
+  SPIWrite(L3G4200D_REG_CTRL_REG1, 0x0f);
   // HPF
   SPIWrite(L3G4200D_REG_CTRL_REG2, 0);
   // Configure CTRL_REG3 to generate data ready interrupt on INT2
@@ -609,7 +610,7 @@ char* btmsg()
 {
   uint8_t bt_msg;
   char *output_msg;
-  HAL_UART_Receive(&huart6, &bt_msg, sizeof(bt_msg), HAL_MAX_DELAY);
+  HAL_UART_Receive(&huart6, &bt_msg, sizeof(bt_msg), 500);
   printf("%d\r\n", bt_msg);
   if(bt_msg == 82)
   {
