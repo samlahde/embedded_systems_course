@@ -69,8 +69,6 @@ char* btmsg(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define User_button_Pin GPIO_PIN_13
-#define User_button_GPIO_Port GPIOC
 #define IR3_Pin GPIO_PIN_3
 #define IR3_GPIO_Port GPIOF
 #define IR2_Pin GPIO_PIN_5
@@ -87,24 +85,22 @@ char* btmsg(void);
 #define SDO_GPIO_Port GPIOA
 #define SDA_Pin GPIO_PIN_7
 #define SDA_GPIO_Port GPIOA
-#define H_ENA_Pin GPIO_PIN_12
-#define H_ENA_GPIO_Port GPIOF
-#define H_ENB_Pin GPIO_PIN_13
-#define H_ENB_GPIO_Port GPIOF
+#define IN1_Pin GPIO_PIN_12
+#define IN1_GPIO_Port GPIOF
+#define ENB_Pin GPIO_PIN_13
+#define ENB_GPIO_Port GPIOF
+#define ENA_Pin GPIO_PIN_15
+#define ENA_GPIO_Port GPIOF
+#define SPI_INT_Pin GPIO_PIN_9
+#define SPI_INT_GPIO_Port GPIOE
+#define IN3_Pin GPIO_PIN_11
+#define IN3_GPIO_Port GPIOE
+#define IN4_Pin GPIO_PIN_13
+#define IN4_GPIO_Port GPIOE
 #define SPI_CS_Pin GPIO_PIN_14
-#define SPI_CS_GPIO_Port GPIOF
-#define H_IN3_Pin GPIO_PIN_9
-#define H_IN3_GPIO_Port GPIOE
-#define H_IN4_Pin GPIO_PIN_11
-#define H_IN4_GPIO_Port GPIOE
-#define H_IN1_Pin GPIO_PIN_14
-#define H_IN1_GPIO_Port GPIOD
-#define H_IN2_Pin GPIO_PIN_15
-#define H_IN2_GPIO_Port GPIOD
-#define SPI_INT1_Pin GPIO_PIN_7
-#define SPI_INT1_GPIO_Port GPIOC
-#define SPI1_CS_Pin GPIO_PIN_15
-#define SPI1_CS_GPIO_Port GPIOA
+#define SPI_CS_GPIO_Port GPIOD
+#define IN2_Pin GPIO_PIN_15
+#define IN2_GPIO_Port GPIOD
 #define BT_RX_Pin GPIO_PIN_9
 #define BT_RX_GPIO_Port GPIOG
 #define BT_TX_Pin GPIO_PIN_14

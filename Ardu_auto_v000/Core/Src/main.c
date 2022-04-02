@@ -104,7 +104,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  //ITM_Port32(31) = 1;
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -139,12 +139,12 @@ int main(void)
 
 	  /*Motor control
 	   * Outputs:
-	   * GPIOF, H_ENA_Pin = Motor 1 enable signal
-	   * GPIOD, H_IN1_Pin = Motor 1 A signal
-	   * GPIOD, H_IN2_Pin = Motor 1 B signal
-	   * GPIOF, H_ENB_Pin = Motor 2 enable signal
-	   * GPIOE, H_IN3_Pin = Motor 2 A signal
-	   * GPIOE, H_IN4_Pin = Motor 2 B signal
+	   * GPIOF, ENA_Pin = Motor 1 enable signal
+	   * GPIOF, IN1_Pin = Motor 1 A signal
+	   * GPIOD, IN2_Pin = Motor 1 B signal
+	   * ENB_GPIO_Port, ENB_Pin = Motor 2 enable signal
+	   * GPIOE, IN3_Pin = Motor 2 A signal
+	   * GPIOE, IN4_Pin = Motor 2 B signal
 	   *
 	   * GPIO_PIN_SET = High
 	   * GPIO_PIN_RESET = LOW
@@ -155,10 +155,14 @@ int main(void)
 	   *
 	   * enable low -> motor stop
 	   * */
-	  HAL_GPIO_WritePin(GPIOF, H_ENA_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOD, H_IN1_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOD, H_IN2_Pin, GPIO_PIN_RESET);
-	  HAL_GPIO_WritePin(GPIOF, H_ENB_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOF, ENA_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOF, IN1_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOD, IN2_Pin, GPIO_PIN_RESET);
+
+	  HAL_GPIO_WritePin(ENB_GPIO_Port, ENB_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOE, IN3_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOE, IN4_Pin, GPIO_PIN_RESET);
+
 
 	  /*Bluetooth
 	   * Input:
@@ -178,12 +182,6 @@ int main(void)
 	  /*GY-50
 	   * HAL SPI 1 Bus
 	   * Addresses in L3G4200D.h library
-	   *
-	   * Problem:
-	   * Doesn't send any data
-	   * Problem could be in initialization or calling phase
-	   * HAL_StatusTypeDef HAL_SPI_Receive(SPI_HandleTypeDef *hspi, uint8_t *pData, uint16_t Size, uint32_t Timeout)
-  	   * HAL_StatusTypeDef HAL_SPI_Transmit(SPI_HandleTypeDef *hspi, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 	   * */
 
 	  me = SPIRead(L3G4200D_REG_WHO_AM_I);
@@ -460,8 +458,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
@@ -469,66 +467,37 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(H_ENA_GPIO_Port, H_ENA_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOF, IN1_Pin|ENA_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, H_ENB_Pin|SPI_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(ENB_GPIO_Port, ENB_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, H_IN3_Pin|H_IN4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, SPI_INT_Pin|IN3_Pin|IN4_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, H_IN1_Pin|H_IN2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin|IN2_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin : User_button_Pin */
-  GPIO_InitStruct.Pin = User_button_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(User_button_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : H_ENA_Pin H_ENB_Pin */
-  GPIO_InitStruct.Pin = H_ENA_Pin|H_ENB_Pin;
+  /*Configure GPIO pins : IN1_Pin ENB_Pin ENA_Pin */
+  GPIO_InitStruct.Pin = IN1_Pin|ENB_Pin|ENA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SPI_CS_Pin */
-  GPIO_InitStruct.Pin = SPI_CS_Pin;
+  /*Configure GPIO pins : SPI_INT_Pin IN3_Pin IN4_Pin */
+  GPIO_InitStruct.Pin = SPI_INT_Pin|IN3_Pin|IN4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(SPI_CS_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : H_IN3_Pin H_IN4_Pin */
-  GPIO_InitStruct.Pin = H_IN3_Pin|H_IN4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : H_IN1_Pin H_IN2_Pin */
-  GPIO_InitStruct.Pin = H_IN1_Pin|H_IN2_Pin;
+  /*Configure GPIO pins : SPI_CS_Pin IN2_Pin */
+  GPIO_InitStruct.Pin = SPI_CS_Pin|IN2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : SPI_INT1_Pin */
-  GPIO_InitStruct.Pin = SPI_INT1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(SPI_INT1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : SPI1_CS_Pin */
-  GPIO_InitStruct.Pin = SPI1_CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(SPI1_CS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB8 PB9 */
   GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
@@ -545,13 +514,13 @@ void SPIWrite(uint8_t address, uint8_t data)
 {
   address &= 0x7F;
   //SPI TX on
-  HAL_GPIO_WritePin(GPIOF, SPI_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_RESET);
   //SPI address transmit
   HAL_SPI_Transmit(&hspi1, &address, sizeof(address), HAL_MAX_DELAY);
   //SPI data transmit
   HAL_SPI_Transmit(&hspi1, &data, sizeof(data), HAL_MAX_DELAY);
   //SPI TX off
-  HAL_GPIO_WritePin(GPIOF, SPI_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_SET);
 }
 
 uint8_t SPIRead(uint8_t address)
@@ -559,13 +528,13 @@ uint8_t SPIRead(uint8_t address)
   uint8_t data;
   address |= 0x80;
   //SPI TX on
-  HAL_GPIO_WritePin(GPIOF, SPI_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_RESET);
   //SPI address transmit
   HAL_SPI_Transmit(&hspi1, &address, sizeof(address), HAL_MAX_DELAY);
   //SPI data receive
   HAL_SPI_Receive(&hspi1, &data, sizeof(data), HAL_MAX_DELAY);
   //SPI TX off
-  HAL_GPIO_WritePin(GPIOF, SPI_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_SET);
   return data;
 }
 
