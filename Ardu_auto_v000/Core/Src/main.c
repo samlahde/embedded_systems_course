@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <L3G4200D.h>
+#include <string.h>
 
 /* USER CODE END Includes */
 
@@ -44,11 +45,13 @@
  ADC_HandleTypeDef hadc3;
 DMA_HandleTypeDef hdma_adc3;
 
+SPI_HandleTypeDef hspi1;
+
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
-
+L3G4200D_output Get_gyro_values(void);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,6 +61,7 @@ static void MX_USART2_UART_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_ADC3_Init(void);
+static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 
 //For printing debug data into monitoring
@@ -81,12 +85,10 @@ int __io_putchar(int ch)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t buf[12];
-  uint8_t x_l;
-  uint8_t x_h;
-  uint8_t bt_msg;
+  char *bt_msg;
   uint8_t me;
   uint32_t IR_data[5];
+  L3G4200D_output gyro_data;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -102,7 +104,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  //ITM_Port32(31) = 1;
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -111,8 +113,11 @@ int main(void)
   MX_DMA_Init();
   MX_USART6_UART_Init();
   MX_ADC3_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
+  //SPI TX off
+  HAL_GPIO_WritePin(GPIOF, SPI_CS_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -134,12 +139,12 @@ int main(void)
 
 	  /*Motor control
 	   * Outputs:
-	   * GPIOF, H_ENA_Pin = Motor 1 enable signal
-	   * GPIOD, H_IN1_Pin = Motor 1 A signal
-	   * GPIOD, H_IN2_Pin = Motor 1 B signal
-	   * GPIOF, H_ENB_Pin = Motor 2 enable signal
-	   * GPIOE, H_IN3_Pin = Motor 2 A signal
-	   * GPIOE, H_IN4_Pin = Motor 2 B signal
+	   * GPIOF, ENA_Pin = Motor 1 enable signal
+	   * GPIOF, IN1_Pin = Motor 1 A signal
+	   * GPIOD, IN2_Pin = Motor 1 B signal
+	   * ENB_GPIO_Port, ENB_Pin = Motor 2 enable signal
+	   * GPIOE, IN3_Pin = Motor 2 A signal
+	   * GPIOE, IN4_Pin = Motor 2 B signal
 	   *
 	   * GPIO_PIN_SET = High
 	   * GPIO_PIN_RESET = LOW
@@ -150,10 +155,14 @@ int main(void)
 	   *
 	   * enable low -> motor stop
 	   * */
-	  HAL_GPIO_WritePin(GPIOF, H_ENA_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOD, H_IN1_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOD, H_IN2_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOF, H_ENB_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOF, ENA_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOF, IN1_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOD, IN2_Pin, GPIO_PIN_RESET);
+
+	  HAL_GPIO_WritePin(ENB_GPIO_Port, ENB_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOE, IN3_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOE, IN4_Pin, GPIO_PIN_RESET);
+
 
 	  /*Bluetooth
 	   * Input:
@@ -167,32 +176,17 @@ int main(void)
 	   * This does not happen with left or right,
 	   * they just push left value until another command is received
 	   * */
-	  HAL_UART_Receive(&huart6, &bt_msg, sizeof(bt_msg), 500);
-	  printf("%d\r\n", bt_msg);
-	  if(bt_msg == 82) printf("rigth\r\n");
-	  else if(bt_msg == 76) printf("left\r\n");
-	  else if(bt_msg == 70) printf("up\r\n");
-	  else if(bt_msg == 71) printf("down\r\n");
-	  else if(bt_msg == 88) printf("x\r\n");
-	  else if(bt_msg == 89) printf("y\r\n");
-	  else  printf("denada\r\n");
+	  bt_msg = btmsg();
+	  printf("%s\r\n", bt_msg);
 
 	  /*GY-50
-	   * HAL I2C 1 Bus
-	   * Disables I2C-bus -> tests do not run if gyro is not in place
+	   * HAL SPI 1 Bus
 	   * Addresses in L3G4200D.h library
-	   *
-	   * Problem:
-	   * Doesn't send any data
-	   * Problem could be in initialization or calling phase
 	   * */
 
-//	  HAL_I2C_Master_Receive(&hi2c1, L3G4200D_REG_STATUS_REG, buf, 1, HAL_MAX_DELAY);
-//	  HAL_I2C_Master_Receive(&hi2c1, L3G4200D_REG_OUT_X_L, &x_l, 1, HAL_MAX_DELAY);
-//	  HAL_I2C_Master_Receive(&hi2c1, L3G4200D_REG_OUT_X_H, &x_h, 1, HAL_MAX_DELAY);
-//	  gyro_data.x = ((x_h << 8) | x_l);
-//	  HAL_I2C_Master_Receive(&hi2c1, L3G4200D_REG_WHO_AM_I, &me, 1, HAL_MAX_DELAY);
-//	  printf("%d %d %d %d %d %d\r\n", buf[0], buf[1], x_l, x_h, me, gyro_data.x);
+	  me = SPIRead(L3G4200D_REG_WHO_AM_I);
+	  gyro_data = Get_gyro_values();
+	  printf("%d %d %d %d\r\n", gyro_data.x, gyro_data.y, gyro_data.z, me);
 
 	  // Delay for readability
 	  HAL_Delay(1000);
@@ -335,6 +329,44 @@ static void MX_ADC3_Init(void)
 }
 
 /**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+  gyroInit();
+  /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -426,8 +458,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
@@ -435,66 +467,37 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(H_ENA_GPIO_Port, H_ENA_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOF, IN1_Pin|ENA_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, H_ENB_Pin|SPI_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(ENB_GPIO_Port, ENB_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, H_IN3_Pin|H_IN4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, SPI_INT_Pin|IN3_Pin|IN4_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, H_IN1_Pin|H_IN2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin|IN2_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : User_button_Pin */
-  GPIO_InitStruct.Pin = User_button_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(User_button_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : H_ENA_Pin H_ENB_Pin */
-  GPIO_InitStruct.Pin = H_ENA_Pin|H_ENB_Pin;
+  /*Configure GPIO pins : IN1_Pin ENB_Pin ENA_Pin */
+  GPIO_InitStruct.Pin = IN1_Pin|ENB_Pin|ENA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SPI_CS_Pin */
-  GPIO_InitStruct.Pin = SPI_CS_Pin;
+  /*Configure GPIO pins : SPI_INT_Pin IN3_Pin IN4_Pin */
+  GPIO_InitStruct.Pin = SPI_INT_Pin|IN3_Pin|IN4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(SPI_CS_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : H_IN3_Pin H_IN4_Pin */
-  GPIO_InitStruct.Pin = H_IN3_Pin|H_IN4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : H_IN1_Pin H_IN2_Pin */
-  GPIO_InitStruct.Pin = H_IN1_Pin|H_IN2_Pin;
+  /*Configure GPIO pins : SPI_CS_Pin IN2_Pin */
+  GPIO_InitStruct.Pin = SPI_CS_Pin|IN2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : SPI_INT1_Pin */
-  GPIO_InitStruct.Pin = SPI_INT1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(SPI_INT1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : SPI1_CS_Pin */
-  GPIO_InitStruct.Pin = SPI1_CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(SPI1_CS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB8 PB9 */
   GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
@@ -507,7 +510,107 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void SPIWrite(uint8_t address, uint8_t data)
+{
+  address &= 0x7F;
+  //SPI TX on
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_RESET);
+  //SPI address transmit
+  HAL_SPI_Transmit(&hspi1, &address, sizeof(address), HAL_MAX_DELAY);
+  //SPI data transmit
+  HAL_SPI_Transmit(&hspi1, &data, sizeof(data), HAL_MAX_DELAY);
+  //SPI TX off
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_SET);
+}
 
+uint8_t SPIRead(uint8_t address)
+{
+  uint8_t data;
+  address |= 0x80;
+  //SPI TX on
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_RESET);
+  //SPI address transmit
+  HAL_SPI_Transmit(&hspi1, &address, sizeof(address), HAL_MAX_DELAY);
+  //SPI data receive
+  HAL_SPI_Receive(&hspi1, &data, sizeof(data), HAL_MAX_DELAY);
+  //SPI TX off
+  HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_SET);
+  return data;
+}
+
+L3G4200D_output Get_gyro_values()
+{
+	uint8_t x_l,x_h,y_l,y_h,z_l,z_h;
+	L3G4200D_output gyro_data;
+	x_l = SPIRead(L3G4200D_REG_OUT_X_L);
+	x_h = SPIRead(L3G4200D_REG_OUT_X_H);
+	y_l = SPIRead(L3G4200D_REG_OUT_Y_L);
+	y_h = SPIRead(L3G4200D_REG_OUT_Y_H);
+	z_l = SPIRead(L3G4200D_REG_OUT_Z_L);
+	z_h = SPIRead(L3G4200D_REG_OUT_Z_H);
+	gyro_data.x = (x_l & 0xFF) | ((x_h & 0xFF) << 8);
+	gyro_data.y = (y_l & 0xFF) | ((y_h & 0xFF) << 8);
+	gyro_data.z = (z_l & 0xFF) | ((z_h & 0xFF) << 8);
+	return gyro_data;
+}
+
+void gyroInit()
+{
+  uint8_t scale, status;
+  status = SPIRead(L3G4200D_REG_WHO_AM_I);
+  printf("%d\r\n", status);
+  // Enable x, y, z and turn off power down mode:
+  SPIWrite(L3G4200D_REG_CTRL_REG1, 0x0f);
+  // HPF
+  SPIWrite(L3G4200D_REG_CTRL_REG2, 0);
+  // Configure CTRL_REG3 to generate data ready interrupt on INT2
+  // No interrupts used on INT1, if you'd like to configure INT1
+  // or INT2 otherwise, consult the datasheet:
+  SPIWrite(L3G4200D_REG_CTRL_REG3, 0);
+  // CTRL_REG4 controls the full-scale range, among other things:
+  scale = 2 & 0x03;
+  SPIWrite(L3G4200D_REG_CTRL_REG4, scale << 4);
+  // CTRL_REG5 controls high-pass filtering of outputs, use it
+  // if you'd like:
+  SPIWrite(L3G4200D_REG_CTRL_REG5, 0);
+}
+
+char* btmsg()
+{
+  uint8_t bt_msg;
+  char *output_msg;
+  HAL_UART_Receive(&huart6, &bt_msg, sizeof(bt_msg), 500);
+  printf("%d\r\n", bt_msg);
+  if(bt_msg == 82)
+  {
+	  output_msg = "right";
+  }
+  else if(bt_msg == 76)
+  {
+ 	  output_msg = "left";
+   }
+  else if(bt_msg == 70)
+  {
+ 	  output_msg = "up";
+   }
+  else if(bt_msg == 71)
+  {
+ 	  output_msg = "down";
+   }
+  else if(bt_msg == 88)
+  {
+ 	  output_msg = "x";
+   }
+  else if(bt_msg == 89)
+  {
+ 	  output_msg = "y";
+   }
+  else
+  {
+ 	  output_msg = "denada";
+   }
+  return output_msg;
+}
 /* USER CODE END 4 */
 
 /**
