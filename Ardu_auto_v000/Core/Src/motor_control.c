@@ -140,3 +140,60 @@ void handle_driving(Cmd_holder cmd){
 	}
 }
 
+void print_driving_state(){
+	uint8_t left_state, right_state;
+	left_state = get_motor_state(LEFT_MT);
+	right_state = get_motor_state(RIGHT_MT);
+	if(left_state == MT_FORWARD && right_state == MT_REVERSE){
+		printf("Turning stopped right");
+	}
+	else if(left_state == MT_REVERSE && right_state == MT_FORWARD){
+			printf("Turning stopped left");
+		}
+	else if (left_state == MT_FORWARD && right_state != MT_FORWARD){
+		printf("Turning forward right");
+	}
+	else if(left_state != MT_FORWARD && right_state == MT_FORWARD){
+		printf("Turning forward left");
+	}
+	else if(left_state == MT_REVERSE && right_state != MT_REVERSE){
+			printf("Turning reverse right");
+		}
+	else if(left_state != MT_REVERSE && right_state == MT_REVERSE){
+			printf("Turning reverse left");
+		}
+	else if(left_state == MT_FORWARD && right_state == MT_FORWARD){
+			printf("Moving forward");
+		}
+	else if(left_state == MT_REVERSE && right_state == MT_REVERSE){
+			printf("Moving reverse");
+		}
+	else
+		printf("Stopped.");
+
+}
+
+uint8_t get_motor_state(uint8_t motor){
+	uint8_t motor_state = MT_STOP;
+	GPIO_PinState enable, in1, in2;
+	if(motor == LEFT_MT){
+		enable = HAL_GPIO_ReadPin(GPIOF, ENA_Pin);
+		in1 = HAL_GPIO_ReadPin(GPIOF, IN1_Pin);
+		in2 = HAL_GPIO_ReadPin(GPIOD, IN2_Pin);
+	}
+	else if(motor == RIGHT_MT){
+		enable = HAL_GPIO_ReadPin(ENB_GPIO_Port, ENB_Pin);
+		in1 = HAL_GPIO_ReadPin(GPIOE, IN3_Pin);
+		in2 = HAL_GPIO_ReadPin(GPIOE, IN4_Pin);
+	}
+	if(enable){
+		if(in1 && !in2){
+			motor_state = MT_FORWARD;
+		}
+		else if(!in1 && in2){
+			motor_state = MT_REVERSE;
+		}
+	}
+	return motor_state;
+
+}

@@ -36,5 +36,7 @@ typedef struct Cmd_holder_{
 
 void motor_set(uint8_t motor, uint8_t command);
 void handle_driving(Cmd_holder cmd);
+void print_driving_state();
+uint8_t get_motor_state(uint8_t motor);
 
 #endif /* INC_MOTOR_CONTROL_H_ */
