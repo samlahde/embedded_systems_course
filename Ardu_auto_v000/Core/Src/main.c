@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <L3G4200D.h>
 #include <string.h>
+#include "motor_control.h"
+#include "bt_control.h"
 
 /* USER CODE END Includes */
 
@@ -85,10 +87,12 @@ int __io_putchar(int ch)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  char *bt_msg;
   uint8_t me;
   uint32_t IR_data[5];
   L3G4200D_output gyro_data;
+
+  Cmd_holder cmd_holder;
+  uint8_t bt_msg;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -128,7 +132,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
+	  bt_msg = get_bt_msg;
+	  handle_bt_msg(bt_msg, cmd_holder);
+	  handle_driving(cmd_holder);
 	  /*IR ADC
 	   * HAL ADC3 DMA values
 	   * IR_data[0] = IR1 ... IR_data[4] = IR5
@@ -136,48 +142,6 @@ int main(void)
 	   * IR_data[n] = 100-300 -> distance < 10 cm
 	   * */
 	  HAL_ADC_Start_DMA(&hadc3, IR_data, 5);
-
-	  /*Motor control
-	   * Outputs:
-	   * GPIOF, ENA_Pin = Motor 1 enable signal
-	   * GPIOF, IN1_Pin = Motor 1 A signal
-	   * GPIOD, IN2_Pin = Motor 1 B signal
-	   * ENB_GPIO_Port, ENB_Pin = Motor 2 enable signal
-	   * GPIOE, IN3_Pin = Motor 2 A signal
-	   * GPIOE, IN4_Pin = Motor 2 B signal
-	   *
-	   * GPIO_PIN_SET = High
-	   * GPIO_PIN_RESET = LOW
-	   * enable high:
-	   * A high, B low -> forward
-	   * A low, B high -> reverse
-	   * A high, B high -> fast motor stop
-	   *
-	   * enable low -> motor stop
-	   * */
-	  HAL_GPIO_WritePin(GPIOF, ENA_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOF, IN1_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOD, IN2_Pin, GPIO_PIN_RESET);
-
-	  HAL_GPIO_WritePin(ENB_GPIO_Port, ENB_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOE, IN3_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOE, IN4_Pin, GPIO_PIN_RESET);
-
-
-	  /*Bluetooth
-	   * Input:
-	   * HAL UART 6 Bus
-	   * Output:
-	   * bt_msg
-	   *
-	   * Problem:
-	   * Left and right commands in Arduino Car stay down
-	   * If you give up or down, bt_msg gives right value and then turns idle
-	   * This does not happen with left or right,
-	   * they just push left value until another command is received
-	   * */
-	  bt_msg = btmsg();
-	  printf("%s\r\n", bt_msg);
 
 	  /*GY-50
 	   * HAL SPI 1 Bus
@@ -538,6 +502,16 @@ uint8_t SPIRead(uint8_t address)
   return data;
 }
 
+
+uint8_t get_bt_msg() {
+  uint8_t msg;
+  uint8_t *msg_p = NULL;
+  HAL_UART_Receive(&huart6, msg_p, sizeof(msg), 500);
+  msg = *msg_p;
+  printf("%d\r\n", msg);
+  return msg;
+}
+
 L3G4200D_output Get_gyro_values()
 {
 	uint8_t x_l,x_h,y_l,y_h,z_l,z_h;
@@ -575,42 +549,6 @@ void gyroInit()
   SPIWrite(L3G4200D_REG_CTRL_REG5, 0);
 }
 
-char* btmsg()
-{
-  uint8_t bt_msg;
-  char *output_msg;
-  HAL_UART_Receive(&huart6, &bt_msg, sizeof(bt_msg), 500);
-  printf("%d\r\n", bt_msg);
-  if(bt_msg == 82)
-  {
-	  output_msg = "right";
-  }
-  else if(bt_msg == 76)
-  {
- 	  output_msg = "left";
-   }
-  else if(bt_msg == 70)
-  {
- 	  output_msg = "up";
-   }
-  else if(bt_msg == 71)
-  {
- 	  output_msg = "down";
-   }
-  else if(bt_msg == 88)
-  {
- 	  output_msg = "x";
-   }
-  else if(bt_msg == 89)
-  {
- 	  output_msg = "y";
-   }
-  else
-  {
- 	  output_msg = "denada";
-   }
-  return output_msg;
-}
 /* USER CODE END 4 */
 
 /**
