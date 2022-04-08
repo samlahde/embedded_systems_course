@@ -1,0 +1,2 @@
+../Core/Src/motor_control.c:34:6:motor_set	16	static
+../Core/Src/motor_control.c:73:6:handle_driving	24	static

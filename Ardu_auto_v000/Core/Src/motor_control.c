@@ -5,6 +5,11 @@
  *      Author: samul
  */
 
+#include "main.h"
+#include <stdio.h>
+#include <L3G4200D.h>
+#include <string.h>
+#include "bt_control.h"
 #include "motor_control.h"
 
 	  /*Motor control
@@ -56,7 +61,7 @@ void motor_set(uint8_t motor, uint8_t command){
 					HAL_GPIO_WritePin(GPIOE, IN3_Pin, GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(GPIOE, IN4_Pin, GPIO_PIN_SET);
 				case MT_STOP:
-					HAL_GPIO_WritePin(ENB_GBIO_PORT, ENB_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(ENB_GPIO_Port, ENB_Pin, GPIO_PIN_RESET);
 				case MT_FAST_STOP:
 					HAL_GPIO_WritePin(ENB_GPIO_Port, ENB_Pin, GPIO_PIN_SET);
 					HAL_GPIO_WritePin(GPIOE, IN3_Pin, GPIO_PIN_SET);
@@ -65,33 +70,33 @@ void motor_set(uint8_t motor, uint8_t command){
 	}
 }
 
-void handle_driving(cmd_holder cmd){
+void handle_driving(Cmd_holder cmd){
 	uint8_t old = cmd->old_cmd;
 	uint8_t new = cmd->new_cmd;
 	uint8_t moving = cmd->moving;
-	if (new != old){
+	if (new != old && new != CMD_NONE){
 		switch(new){
-		    case FORWARD:
+		    case CMD_FORWARD:
 		    	motor_set(LEFT_MT, MT_FORWARD);
 		    	motor_set(RIGHT_MT, MT_FORWARD);
 		    	cmd->moving = MOVING_FORWARD;
 
-		    case REVERSE:
+		    case CMD_REVERSE:
 				motor_set(LEFT_MT, MT_REVERSE);
 				motor_set(RIGHT_MT, MT_REVERSE);
 				cmd->moving = MOVING_REVERSE;
 
-		    case STOP:
+		    case CMD_STOP:
 		    	motor_set(LEFT_MT, MT_STOP);
 				motor_set(RIGHT_MT, MT_STOP);
 				cmd->moving = STOPPED;
 
-		    case FAST_STOP:
+		    case CMD_FAST_STOP:
 		    	motor_set(LEFT_MT, MT_FAST_STOP);
 		    	motor_set(RIGHT_MT, MT_FAST_STOP);
 		    	cmd->moving = STOPPED;
 
-			case TURN_RIGHT:
+			case CMD_TURN_RIGHT:
 				switch(moving){
 					case MOVING_FORWARD:
 						motor_set(LEFT_MT, MT_FORWARD);
@@ -107,7 +112,7 @@ void handle_driving(cmd_holder cmd){
 				}
 				cmd->moving = moving;
 
-			case TURN_LEFT:
+			case CMD_TURN_LEFT:
 				switch(moving){
 					case MOVING_FORWARD:
 						motor_set(LEFT_MT, MT_REVERSE);
@@ -122,10 +127,10 @@ void handle_driving(cmd_holder cmd){
 						motor_set(RIGHT_MT, MT_FORWARD);
 				}
 				cmd->moving = moving;
-
+			default:
+				break;
 		}
+		cmd->old_cmd = new;
 	}
-	else
-		cmd->new_cmd = cmd->old_cmd;
 }
 
