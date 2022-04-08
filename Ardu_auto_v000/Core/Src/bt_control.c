@@ -17,12 +17,16 @@ void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 	switch(msg) {
 		case BT_TURN_RIGHT:
 			new = CMD_TURN_RIGHT;
+			break;
 		case BT_TURN_LEFT:
 			new = CMD_TURN_LEFT;
+			break;
 		case BT_FORWARD:
 			new = CMD_FORWARD;
+			break;
 		case BT_REVERSE:
 			new = CMD_REVERSE;
+			break;
 		case BT_X:
 			break;
 		case BT_Y:

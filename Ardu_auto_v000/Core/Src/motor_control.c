@@ -109,6 +109,9 @@ void handle_driving(Cmd_holder cmd){
 					case STOPPED:
 						motor_set(LEFT_MT, MT_FORWARD);
 						motor_set(RIGHT_MT, MT_REVERSE);
+					default:
+						motor_set(LEFT_MT, MT_FORWARD);
+						motor_set(RIGHT_MT, MT_REVERSE);
 				}
 				cmd->moving = moving;
 
@@ -125,6 +128,9 @@ void handle_driving(Cmd_holder cmd){
 					case STOPPED:
 						motor_set(LEFT_MT, MT_REVERSE);
 						motor_set(RIGHT_MT, MT_FORWARD);
+					default:
+						motor_set(LEFT_MT, MT_FORWARD);
+						motor_set(RIGHT_MT, MT_REVERSE);
 				}
 				cmd->moving = moving;
 			default:

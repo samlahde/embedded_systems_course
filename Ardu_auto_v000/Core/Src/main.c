@@ -505,9 +505,7 @@ uint8_t SPIRead(uint8_t address)
 
 uint8_t get_bt_msg() {
   uint8_t msg;
-  uint8_t *msg_p = NULL;
-  HAL_UART_Receive(&huart6, msg_p, sizeof(msg), 500);
-  msg = *msg_p;
+  HAL_UART_Receive(&huart6, &msg, sizeof(msg), 500);
   printf("%d\r\n", msg);
   return msg;
 }
