@@ -28,11 +28,14 @@ void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 			new = CMD_REVERSE;
 			break;
 		case BT_X:
+			new = CMD_CONT_FORW;
 			break;
 		case BT_Y:
+			new = CMD_STOP;
 			break;
 		default:
 			new = CMD_NONE;
+			break;
 	}
 	cmd->new_cmd = new;
 }

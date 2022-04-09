@@ -91,7 +91,7 @@ int main(void)
   uint32_t IR_data[5];
   L3G4200D_output gyro_data;
 
-  Cmd_holder cmd_holder = NULL;
+  Cmd_holder cmd_holder;
   uint8_t bt_msg;
   /* USER CODE END 1 */
 
@@ -132,10 +132,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  bt_msg = get_bt_msg;
+	  bt_msg = get_bt_msg();
 	  handle_bt_msg(bt_msg, cmd_holder);
 	  handle_driving(cmd_holder);
-	  print_driving_state();
+	  print_driving_state(cmd_holder);
+
 	  /*IR ADC
 	   * HAL ADC3 DMA values
 	   * IR_data[0] = IR1 ... IR_data[4] = IR5
