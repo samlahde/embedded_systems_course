@@ -10,6 +10,7 @@
 
 #include "motor_control.h"
 
+
 #define BT_TURN_RIGHT  82
 #define BT_TURN_LEFT   76
 #define BT_FORWARD     70
@@ -19,5 +20,6 @@
 #define BT_NO_COMMAND  0
 
 void handle_bt_msg(uint8_t msg, Cmd_holder cmd);
+
 
 #endif /* INC_BT_CONTROL_H_ */
