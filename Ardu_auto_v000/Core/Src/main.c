@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <L3G4200D.h>
 #include <string.h>
+#include "cmd.h"
 #include "motor_control.h"
 #include "bt_control.h"
 
