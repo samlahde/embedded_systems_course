@@ -27,6 +27,7 @@
 #include "cmd.h"
 #include "motor_control.h"
 #include "bt_control.h"
+#include "mapping.h"
 
 /* USER CODE END Includes */
 
