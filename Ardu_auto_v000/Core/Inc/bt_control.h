@@ -8,11 +8,10 @@
 #ifndef INC_BT_CONTROL_H_
 #define INC_BT_CONTROL_H_
 
-#include "motor_control.h"
+#include "cmd.h"
 
-
-#define BT_TURN_RIGHT  82
 #define BT_TURN_LEFT   76
+#define BT_TURN_RIGHT  82
 #define BT_FORWARD     70
 #define BT_REVERSE     71
 #define BT_X           88
