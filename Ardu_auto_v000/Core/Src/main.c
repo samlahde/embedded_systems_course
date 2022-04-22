@@ -27,6 +27,8 @@
 #include "cmd.h"
 #include "motor_control.h"
 #include "bt_control.h"
+#include "self_driving.h"
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -88,10 +90,10 @@ int __io_putchar(int ch)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t me;
+  //uint8_t me;
   uint32_t IR_data[5];
   L3G4200D_output gyro_data;
-
+  IR_data_type IR_output_data;
   Cmd_holder cmd_holder;
   uint8_t bt_msg;
   /* USER CODE END 1 */
@@ -133,27 +135,29 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  bt_msg = get_bt_msg();
-	  handle_bt_msg(bt_msg, cmd_holder);
-	  handle_driving(cmd_holder);
-	  print_driving_state(cmd_holder);
-
 	  /*IR ADC
 	   * HAL ADC3 DMA values
 	   * IR_data[0] = IR1 ... IR_data[4] = IR5
 	   * IR_data[n] = 4095 -> distance > 10 cm
 	   * IR_data[n] = 100-300 -> distance < 10 cm
 	   * */
+
 	  HAL_ADC_Start_DMA(&hadc3, IR_data, 5);
+
+	  bt_msg = get_bt_msg();
+	  //handle_bt_msg(bt_msg, cmd_holder);
+	  self_driving(cmd_holder, IR_data);
+	  handle_driving(cmd_holder);
+	  print_driving_state(cmd_holder);
 
 	  /*GY-50
 	   * HAL SPI 1 Bus
 	   * Addresses in L3G4200D.h library
 	   * */
 
-	  me = SPIRead(L3G4200D_REG_WHO_AM_I);
-	  gyro_data = Get_gyro_values();
-	  printf("%d %d %d %d\r\n", gyro_data.x, gyro_data.y, gyro_data.z, me);
+	  //me = SPIRead(L3G4200D_REG_WHO_AM_I);
+	  //gyro_data = Get_gyro_values();
+	  //printf("%d %d %d %d\r\n", gyro_data.x, gyro_data.y, gyro_data.z, me);
 
 	  // Delay for readability
 	  HAL_Delay(1000);

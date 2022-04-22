@@ -29,8 +29,8 @@ Core/Src/bt_control.o: ../Core/Src/bt_control.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/L3G4200D.h ../Core/Inc/bt_control.h \
- ../Core/Inc/motor_control.h ../Core/Inc/motor_control.h
+ ../Core/Inc/L3G4200D.h ../Core/Inc/bt_control.h ../Core/Inc/cmd.h \
+ ../Core/Inc/motor_control.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -64,5 +64,5 @@ Core/Src/bt_control.o: ../Core/Src/bt_control.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
 ../Core/Inc/L3G4200D.h:
 ../Core/Inc/bt_control.h:
-../Core/Inc/motor_control.h:
+../Core/Inc/cmd.h:
 ../Core/Inc/motor_control.h:
