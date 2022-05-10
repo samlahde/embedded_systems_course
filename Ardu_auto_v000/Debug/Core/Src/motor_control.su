@@ -1,4 +1,4 @@
 ../Core/Src/motor_control.c:34:6:motor_set	16	static
 ../Core/Src/motor_control.c:81:6:handle_driving	24	static
-../Core/Src/motor_control.c:153:6:print_driving_state	24	static
-../Core/Src/motor_control.c:186:9:get_motor_state	24	static
+../Core/Src/motor_control.c:188:6:print_driving_state	24	static
+../Core/Src/motor_control.c:229:9:get_motor_state	24	static

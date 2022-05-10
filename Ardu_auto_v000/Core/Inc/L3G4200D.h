@@ -59,7 +59,7 @@
 //#define VECTOR_STRUCT_H
 typedef struct Vector
 {
-	uint16_t x, y, z;
+	int16_t x, y, z;
 } L3G4200D_output;
 //#endif
 

@@ -14,33 +14,12 @@
 
 void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 	uint8_t new = CMD_NONE;
-	uint8_t moving = cmd->moving;
 	switch(msg) {
-		case BT_TURN_LEFT:
-			switch(moving){
-				case MOVING_FORWARD:
-					new = CMD_TURN_LEFT_FWD;
-					break;
-				case MOVING_REVERSE:
-					new = CMD_TURN_LEFT_REV;
-					break;
-				case STOPPED:
-					new = CMD_TURN_LEFT_STOPPED;
-					break;
-			}
-			break;
 		case BT_TURN_RIGHT:
-			switch(moving){
-				case MOVING_FORWARD:
-					new = CMD_TURN_RIGHT_FWD;
-					break;
-				case MOVING_REVERSE:
-					new = CMD_TURN_RIGHT_REV;
-					break;
-				case STOPPED:
-					new = CMD_TURN_RIGHT_STOPPED;
-					break;
-			}
+			new = CMD_TURN_RIGHT;
+			break;
+		case BT_TURN_LEFT:
+			new = CMD_TURN_LEFT;
 			break;
 		case BT_FORWARD:
 			new = CMD_FORWARD;
@@ -49,9 +28,10 @@ void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 			new = CMD_REVERSE;
 			break;
 		case BT_X:
+			new = CMD_CONT_FORW;
 			break;
 		case BT_Y:
-			new = CMD_FAST_STOP;
+			new = CMD_STOP;
 			break;
 		default:
 			new = CMD_NONE;

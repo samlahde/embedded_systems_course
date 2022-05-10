@@ -24,11 +24,8 @@
 #include <stdio.h>
 #include <L3G4200D.h>
 #include <string.h>
-#include "cmd.h"
 #include "motor_control.h"
 #include "bt_control.h"
-#include "self_driving.h"
-#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -90,10 +87,10 @@ int __io_putchar(int ch)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  //uint8_t me;
-  uint32_t IR_data[5];
+  uint8_t me;
+  uint32_t IR_data[6];
   L3G4200D_output gyro_data;
-  IR_data_type IR_output_data;
+
   Cmd_holder cmd_holder;
   uint8_t bt_msg;
   /* USER CODE END 1 */
@@ -135,32 +132,31 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  bt_msg = get_bt_msg();
+	  handle_bt_msg(bt_msg, cmd_holder);
+	  handle_driving(cmd_holder);
+	  //print_driving_state(cmd_holder);
+
 	  /*IR ADC
 	   * HAL ADC3 DMA values
 	   * IR_data[0] = IR1 ... IR_data[4] = IR5
 	   * IR_data[n] = 4095 -> distance > 10 cm
 	   * IR_data[n] = 100-300 -> distance < 10 cm
 	   * */
-
 	  HAL_ADC_Start_DMA(&hadc3, IR_data, 5);
-
-	  bt_msg = get_bt_msg();
-	  //handle_bt_msg(bt_msg, cmd_holder);
-	  self_driving(cmd_holder, IR_data);
-	  handle_driving(cmd_holder);
-	  print_driving_state(cmd_holder);
+	  //printf("%ld, %ld, %ld, %ld, %ld\r\n", IR_data[1], IR_data[2], IR_data[3], IR_data[4], IR_data[5]);
 
 	  /*GY-50
 	   * HAL SPI 1 Bus
 	   * Addresses in L3G4200D.h library
 	   * */
 
-	  //me = SPIRead(L3G4200D_REG_WHO_AM_I);
-	  //gyro_data = Get_gyro_values();
-	  //printf("%d %d %d %d\r\n", gyro_data.x, gyro_data.y, gyro_data.z, me);
+	  me = SPIRead(L3G4200D_REG_WHO_AM_I);
+	  gyro_data = Get_gyro_values();
+	  printf("%d %d %d\r\n", gyro_data.x, gyro_data.y, gyro_data.z);
 
 	  // Delay for readability
-	  HAL_Delay(1000);
+	  HAL_Delay(500);
   }
   /* USER CODE END 3 */
 }
@@ -513,13 +509,13 @@ uint8_t SPIRead(uint8_t address)
 uint8_t get_bt_msg() {
   uint8_t msg;
   HAL_UART_Receive(&huart6, &msg, sizeof(msg), 500);
-  printf("%d\r\n", msg);
+  //printf("%d\r\n", msg);
   return msg;
 }
 
 L3G4200D_output Get_gyro_values()
 {
-	uint8_t x_l,x_h,y_l,y_h,z_l,z_h;
+	int8_t x_l,x_h,y_l,y_h,z_l,z_h;
 	L3G4200D_output gyro_data;
 	x_l = SPIRead(L3G4200D_REG_OUT_X_L);
 	x_h = SPIRead(L3G4200D_REG_OUT_X_H);
