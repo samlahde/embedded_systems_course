@@ -15,6 +15,7 @@
 void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 	uint8_t new = CMD_NONE;
 	uint8_t moving = cmd->moving;
+	uint8_t mode = cmd->mode;
 	switch(msg) {
 		case BT_TURN_LEFT:
 			switch(moving){
@@ -49,7 +50,12 @@ void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 			new = CMD_REVERSE;
 			break;
 		case BT_X:
-			break;
+			if(mode == MODE_MANUAL){
+			    cmd->mode = MODE_SELF_DRIVE;
+			}
+			else{
+			    cmd->mode = MODE_MANUAL;
+			}
 		case BT_Y:
 			new = CMD_FAST_STOP;
 			break;
@@ -57,5 +63,7 @@ void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 			new = CMD_NONE;
 			break;
 	}
-	cmd->new_cmd = new;
+	if(cmd->mode == MODE_MANUAL){
+	    cmd->new_cmd = new;
+	}
 }

@@ -96,6 +96,11 @@ int main(void)
   IR_data_type IR_output_data;
   Cmd_holder cmd_holder;
   uint8_t bt_msg;
+
+  cmd_holder->new_cmd = CMD_NONE;
+  cmd_holder->old_cmd = CMD_NONE;
+  cmd_holder->moving = STOPPED;
+  cmd_holder->mode = MODE_MANUAL;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -143,10 +148,12 @@ int main(void)
 	   * */
 
 	  HAL_ADC_Start_DMA(&hadc3, IR_data, 5);
-
 	  bt_msg = get_bt_msg();
 	  handle_bt_msg(bt_msg, cmd_holder);
-	  //self_driving(cmd_holder, IR_data);
+
+	  if(cmd_holder->mode == MODE_SELF_DRIVE){
+	      self_driving(cmd_holder, IR_data);
+	  }
 	  handle_driving(cmd_holder);
 	  print_driving_state(cmd_holder);
 
