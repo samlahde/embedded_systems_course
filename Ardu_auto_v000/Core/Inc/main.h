@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdbool.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -65,8 +65,7 @@ void Error_Handler(void);
 uint8_t SPIRead(uint8_t address);
 void SPIWrite(uint8_t address, uint8_t data);
 void gyroInit(void);
-char* btmsg(void);
-uint8_t get_bt_msg();
+uint8_t get_bt_msg(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

@@ -81,7 +81,6 @@ void motor_set(uint8_t motor, uint8_t command){
 void handle_driving(Cmd_holder cmd){
 	uint8_t old = cmd->old_cmd;
 	uint8_t new = cmd->new_cmd;
-	uint8_t moving = cmd->moving;
 	if (new != old && new != CMD_NONE){
 		switch(new){
 		    case CMD_FORWARD:
@@ -108,81 +107,47 @@ void handle_driving(Cmd_holder cmd){
 		    	cmd->moving = STOPPED;
 		    	break;
 
-			case CMD_TURN_RIGHT:
-				switch(moving){
-					case MOVE_CONT_FORW:
-						motor_set(LEFT_MT, MT_FORWARD);
-						motor_set(RIGHT_MT, MT_STOP);
-						break;
-
-					case MOVING_REVERSE:
-						motor_set(LEFT_MT, MT_REVERSE);
-						motor_set(RIGHT_MT, MT_STOP);
-						break;
-
-					case STOPPED:
-						motor_set(LEFT_MT, MT_FORWARD);
-						motor_set(RIGHT_MT, MT_REVERSE);
-						break;
-
-					default:
-						motor_set(LEFT_MT, MT_FORWARD);
-						motor_set(RIGHT_MT, MT_REVERSE);
-						break;
-				}
-				cmd->moving = moving;
-				break;
-
-			case CMD_TURN_LEFT:
-				switch(moving){
-					case MOVE_CONT_FORW:
-						motor_set(LEFT_MT, MT_STOP);
-						motor_set(RIGHT_MT, MT_FORWARD);
-						break;
-
-					case MOVING_REVERSE:
-						motor_set(LEFT_MT, MT_STOP);
-						motor_set(RIGHT_MT, MT_REVERSE);
-						break;
-
-					case STOPPED:
-						motor_set(LEFT_MT, MT_REVERSE);
-						motor_set(RIGHT_MT, MT_FORWARD);
-						break;
-
-					default:
-						motor_set(LEFT_MT, MT_REVERSE);
-						motor_set(RIGHT_MT, MT_FORWARD);
-						break;
-
-				}
-				cmd->moving = moving;
-				break;
-			case CMD_CONT_FORW:
-				motor_set(LEFT_MT, MT_FORWARD);
+			case CMD_TURN_LEFT_FWD:
+				motor_set(LEFT_MT, MT_STOP);
 				motor_set(RIGHT_MT, MT_FORWARD);
-				cmd->moving = MOVE_CONT_FORW;
+				cmd->moving = MOVING_FORWARD;
 				break;
+
+			case CMD_TURN_LEFT_REV:
+				motor_set(LEFT_MT, MT_STOP);
+				motor_set(RIGHT_MT, MT_REVERSE);
+				cmd->moving = MOVING_REVERSE;
+				break;
+
+			case CMD_TURN_LEFT_STOPPED:
+				motor_set(LEFT_MT, MT_REVERSE);
+				motor_set(RIGHT_MT, MT_FORWARD);
+				cmd->moving = STOPPED;
+				break;
+
+			case CMD_TURN_RIGHT_FWD:
+				motor_set(LEFT_MT, MT_FORWARD);
+				motor_set(RIGHT_MT, MT_STOP);
+				cmd->moving = MOVING_FORWARD;
+				break;
+
+			case CMD_TURN_RIGHT_REV:
+				motor_set(LEFT_MT, MT_REVERSE);
+				motor_set(RIGHT_MT, MT_STOP);
+				cmd->moving = MOVING_REVERSE;
+				break;
+
+			case CMD_TURN_RIGHT_STOPPED:
+				motor_set(LEFT_MT, MT_FORWARD);
+				motor_set(RIGHT_MT, MT_REVERSE);
+				cmd->moving = STOPPED;
+				break;
+
 			default:
 				break;
 		}
-
+		cmd->old_cmd = new;
 	}
-	else
-	{
-		if(cmd->moving == MOVE_CONT_FORW){
-			motor_set(LEFT_MT, MT_FORWARD);
-			motor_set(RIGHT_MT, MT_FORWARD);
-			cmd->moving = MOVE_CONT_FORW;
-		}
-		else
-		{
-			motor_set(LEFT_MT, MT_STOP);
-			motor_set(RIGHT_MT, MT_STOP);
-			cmd->moving = STOPPED;
-		}
-	}
-	cmd->old_cmd = new;
 }
 
 void print_driving_state(Cmd_holder cmd){
@@ -208,15 +173,7 @@ void print_driving_state(Cmd_holder cmd){
 			printf("Turning reverse left\r\n");
 		}
 	else if(left_state == MT_FORWARD && right_state == MT_FORWARD){
-			if (cmd->moving == MOVE_CONT_FORW)
-			{
-				printf("Moving continually forward\r\n");
-			}
-			else
-			{
-				printf("Moving forward\r\n");
-			}
-
+			printf("Moving forward\r\n");
 		}
 	else if(left_state == MT_REVERSE && right_state == MT_REVERSE){
 			printf("Moving reverse\r\n");

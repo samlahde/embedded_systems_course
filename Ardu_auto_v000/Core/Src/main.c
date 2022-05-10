@@ -24,8 +24,11 @@
 #include <stdio.h>
 #include <L3G4200D.h>
 #include <string.h>
+#include "cmd.h"
 #include "motor_control.h"
 #include "bt_control.h"
+#include "self_driving.h"
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -87,10 +90,10 @@ int __io_putchar(int ch)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t me;
-  uint32_t IR_data[6];
-  L3G4200D_output gyro_data;
 
+  uint32_t IR_data[5];
+  L3G4200D_output gyro_data;
+  IR_data_type IR_output_data;
   Cmd_holder cmd_holder;
   uint8_t bt_msg;
   /* USER CODE END 1 */
@@ -132,31 +135,32 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  bt_msg = get_bt_msg();
-	  handle_bt_msg(bt_msg, cmd_holder);
-	  handle_driving(cmd_holder);
-	  //print_driving_state(cmd_holder);
-
 	  /*IR ADC
 	   * HAL ADC3 DMA values
 	   * IR_data[0] = IR1 ... IR_data[4] = IR5
 	   * IR_data[n] = 4095 -> distance > 10 cm
 	   * IR_data[n] = 100-300 -> distance < 10 cm
 	   * */
+
 	  HAL_ADC_Start_DMA(&hadc3, IR_data, 5);
-	  //printf("%ld, %ld, %ld, %ld, %ld\r\n", IR_data[1], IR_data[2], IR_data[3], IR_data[4], IR_data[5]);
+
+	  bt_msg = get_bt_msg();
+	  handle_bt_msg(bt_msg, cmd_holder);
+	  //self_driving(cmd_holder, IR_data);
+	  handle_driving(cmd_holder);
+	  print_driving_state(cmd_holder);
 
 	  /*GY-50
 	   * HAL SPI 1 Bus
 	   * Addresses in L3G4200D.h library
 	   * */
 
-	  me = SPIRead(L3G4200D_REG_WHO_AM_I);
+
 	  gyro_data = Get_gyro_values();
-	  printf("%d %d %d\r\n", gyro_data.x, gyro_data.y, gyro_data.z);
+	  printf("%d %d %d \r\n", gyro_data.x, gyro_data.y, gyro_data.z);
 
 	  // Delay for readability
-	  HAL_Delay(500);
+	  HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
@@ -479,7 +483,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void SPIWrite(uint8_t address, uint8_t data)
 {
-  address &= 0x7F;
+  address |= 0x40;
   //SPI TX on
   HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_RESET);
   //SPI address transmit
@@ -493,7 +497,7 @@ void SPIWrite(uint8_t address, uint8_t data)
 uint8_t SPIRead(uint8_t address)
 {
   uint8_t data;
-  address |= 0x80;
+  address |= 0xA0;
   //SPI TX on
   HAL_GPIO_WritePin(GPIOD, SPI_CS_Pin, GPIO_PIN_RESET);
   //SPI address transmit
@@ -509,31 +513,41 @@ uint8_t SPIRead(uint8_t address)
 uint8_t get_bt_msg() {
   uint8_t msg;
   HAL_UART_Receive(&huart6, &msg, sizeof(msg), 500);
-  //printf("%d\r\n", msg);
+  printf("%d\r\n", msg);
   return msg;
 }
 
 L3G4200D_output Get_gyro_values()
 {
-	int8_t x_l,x_h,y_l,y_h,z_l,z_h;
+	uint8_t x_l,x_h,y_l,y_h,z_l,z_h;
 	L3G4200D_output gyro_data;
-	x_l = SPIRead(L3G4200D_REG_OUT_X_L);
-	x_h = SPIRead(L3G4200D_REG_OUT_X_H);
-	y_l = SPIRead(L3G4200D_REG_OUT_Y_L);
-	y_h = SPIRead(L3G4200D_REG_OUT_Y_H);
-	z_l = SPIRead(L3G4200D_REG_OUT_Z_L);
-	z_h = SPIRead(L3G4200D_REG_OUT_Z_H);
-	gyro_data.x = (x_l & 0xFF) | ((x_h & 0xFF) << 8);
-	gyro_data.y = (y_l & 0xFF) | ((y_h & 0xFF) << 8);
-	gyro_data.z = (z_l & 0xFF) | ((z_h & 0xFF) << 8);
+//	x_l = SPIRead(L3G4200D_REG_OUT_X_L);
+//	x_h = SPIRead(L3G4200D_REG_OUT_X_H);
+//	y_l = SPIRead(L3G4200D_REG_OUT_Y_L);
+//	y_h = SPIRead(L3G4200D_REG_OUT_Y_H);
+//	z_l = SPIRead(L3G4200D_REG_OUT_Z_L);
+//	z_h = SPIRead(L3G4200D_REG_OUT_Z_H);
+//	gyro_data.x = (x_l & 0xFF) | ((x_h & 0xFF) << 8);
+//	gyro_data.y = (y_l & 0xFF) | ((y_h & 0xFF) << 8);
+//	gyro_data.z = (z_l & 0xFF) | ((z_h & 0xFF) << 8);
+	x_l = SPIRead(ADXL345_REG_DATAX0);
+	x_h = SPIRead(ADXL345_REG_DATAX1);
+	y_l = SPIRead(ADXL345_REG_DATAY0);
+	y_h = SPIRead(ADXL345_REG_DATAY1);
+	z_l = SPIRead(ADXL345_REG_DATAZ0);
+	z_h = SPIRead(ADXL345_REG_DATAZ1);
+	gyro_data.x = x_l | (x_h << 8);
+	gyro_data.y = y_l | (y_h << 8);
+	gyro_data.z = z_l | (z_h << 8);
+
 	return gyro_data;
 }
 
 void gyroInit()
 {
-  uint8_t scale, status;
-  status = SPIRead(L3G4200D_REG_WHO_AM_I);
-  printf("%d\r\n", status);
+  //uint8_t scale, status;
+  //status = SPIRead(L3G4200D_REG_WHO_AM_I);
+  /*printf("%d\r\n", status);
   // Enable x, y, z and turn off power down mode:
   SPIWrite(L3G4200D_REG_CTRL_REG1, 0x0f);
   // HPF
@@ -547,7 +561,14 @@ void gyroInit()
   SPIWrite(L3G4200D_REG_CTRL_REG4, scale << 4);
   // CTRL_REG5 controls high-pass filtering of outputs, use it
   // if you'd like:
-  SPIWrite(L3G4200D_REG_CTRL_REG5, 0);
+  SPIWrite(L3G4200D_REG_CTRL_REG5, 0);*/
+  SPIWrite(ADXL345_REG_DATA_FORMAT , 0x0B);
+  SPIWrite(ADXL345_REG_POWER_CTL , 0);
+  SPIWrite(ADXL345_REG_POWER_CTL , 8);
+  uint8_t me;
+  me = SPIRead(ADXL345_REG_DEVID);
+  printf(" Device ID: %d\r\n", me);
+
 }
 
 /* USER CODE END 4 */
