@@ -20,10 +20,18 @@
 #define CMD_TURN_RIGHT_REV  	9
 #define CMD_TURN_RIGHT_STOPPED  10
 
+#define STOPPED         0
+#define MOVING_FORWARD  1
+#define MOVING_REVERSE  2
+
+#define MODE_SELF_DRIVE 0
+#define MODE_MANUAL     1
+
 typedef struct Cmd_holder_{
 	uint8_t old_cmd;
 	uint8_t new_cmd;
 	uint8_t moving;
+	uint8_t mode;
 } *Cmd_holder;
 
 #endif /* INC_CMD_H_ */

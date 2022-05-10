@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdlib.h>
 #include <L3G4200D.h>
 #include <string.h>
 #include "cmd.h"
@@ -39,6 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define PRINT_FREQ 3
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -92,10 +94,15 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   uint32_t IR_data[5];
-  L3G4200D_output gyro_data;
-  IR_data_type IR_output_data;
-  Cmd_holder cmd_holder;
+  //L3G4200D_output gyro_data;
+  Cmd_holder cmd_holder = (Cmd_holder)malloc(sizeof(uint8_t) * 4);
   uint8_t bt_msg;
+  int print_iterator = 0;
+
+  cmd_holder->new_cmd = CMD_NONE;
+  cmd_holder->old_cmd = CMD_NONE;
+  cmd_holder->moving = STOPPED;
+  cmd_holder->mode = MODE_MANUAL;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -143,24 +150,30 @@ int main(void)
 	   * */
 
 	  HAL_ADC_Start_DMA(&hadc3, IR_data, 5);
-
 	  bt_msg = get_bt_msg();
 	  handle_bt_msg(bt_msg, cmd_holder);
-	  //self_driving(cmd_holder, IR_data);
-	  handle_driving(cmd_holder);
-	  print_driving_state(cmd_holder);
 
+	  if(cmd_holder->mode == MODE_SELF_DRIVE){
+	      self_driving(cmd_holder, IR_data);
+	  }
+	  handle_driving(cmd_holder);
+
+	  if(print_iterator >= PRINT_FREQ){
+	      print_driving_state(cmd_holder);
+	      print_iterator = 0;
+	  }
+	  print_iterator++;
 	  /*GY-50
 	   * HAL SPI 1 Bus
 	   * Addresses in L3G4200D.h library
 	   * */
 
 
-	  gyro_data = Get_gyro_values();
-	  printf("%d %d %d \r\n", gyro_data.x, gyro_data.y, gyro_data.z);
+	  //gyro_data = Get_gyro_values();
+	  //printf("%d %d %d \r\n", gyro_data.x, gyro_data.y, gyro_data.z);
 
 	  // Delay for readability
-	  HAL_Delay(1000);
+	  //HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }

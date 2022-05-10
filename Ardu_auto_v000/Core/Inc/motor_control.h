@@ -18,10 +18,6 @@
 #define MT_FORWARD     2
 #define MT_REVERSE     3
 
-#define STOPPED        0
-#define MOVING_FORWARD 1
-#define MOVING_REVERSE 2
-
 void motor_set(uint8_t motor, uint8_t command);
 void handle_driving(Cmd_holder cmd);
 void print_driving_state(Cmd_holder cmd);
