@@ -52,9 +52,12 @@ void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 		case BT_X:
 			if(mode == MODE_MANUAL){
 			    cmd->mode = MODE_SELF_DRIVE;
+			    printf("Switching to autonomous driving.\n");
 			}
 			else{
 			    cmd->mode = MODE_MANUAL;
+			    cmd->new_cmd = CMD_FAST_STOP;
+			    printf("Switching to manual control.\n");
 			}
 			break;
 		case BT_Y:
