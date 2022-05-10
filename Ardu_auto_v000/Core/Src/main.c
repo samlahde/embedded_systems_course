@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdlib.h>
 #include <L3G4200D.h>
 #include <string.h>
 #include "cmd.h"
@@ -94,7 +95,7 @@ int main(void)
   uint32_t IR_data[5];
   L3G4200D_output gyro_data;
   IR_data_type IR_output_data;
-  Cmd_holder cmd_holder;
+  Cmd_holder cmd_holder = (Cmd_holder)malloc(sizeof(uint8_t) * 4);
   uint8_t bt_msg;
 
   cmd_holder->new_cmd = CMD_NONE;
