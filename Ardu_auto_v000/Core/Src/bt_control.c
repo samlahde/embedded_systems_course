@@ -56,7 +56,7 @@ void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 			}
 			else{
 			    cmd->mode = MODE_MANUAL;
-			    cmd->new_cmd = CMD_FAST_STOP;
+			    new = CMD_FAST_STOP;
 			    printf("Switching to manual control.\n");
 			}
 			break;
