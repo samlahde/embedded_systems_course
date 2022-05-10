@@ -56,6 +56,7 @@ void handle_bt_msg(uint8_t msg, Cmd_holder cmd) {
 			else{
 			    cmd->mode = MODE_MANUAL;
 			}
+			break;
 		case BT_Y:
 			new = CMD_FAST_STOP;
 			break;
