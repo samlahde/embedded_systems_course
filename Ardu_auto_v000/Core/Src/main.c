@@ -40,7 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define PRINT_FREQ 100
+#define PRINT_FREQ 3
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
